@@ -23,16 +23,24 @@ class Bookslist(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-
 class BookView(APIView):
-    def get(self,request,bookname):
-        books = BookstoreData.objects.get(pk=bookname)
+
+
+
+    def get(self, request, bookname):
+        try:
+            books = BookstoreData.objects.get(pk=bookname)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = Bookstoreserializer(books)
-        return Response(serializer.data , status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    def post(self,request,pk):
-        data1=BookstoreData.objects.get(pk=pk)
+    def put(self,request,bookname):
+        try:
+            data1=BookstoreData.objects.get(pk=bookname)
+        except:
+            return Response({'msg':"record not found"},status=status.HTTP_404_NOT_FOUND)
         data = request.data
         serializer = Bookstoreserializer(data1,data=data)
 
@@ -43,54 +51,6 @@ class BookView(APIView):
         else:
             return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
 
-class BookDetails(APIView):
-    # def get_object(self,pk):
-    #     try:
-    #         books = BookstoreData.objects.get(pk=pk)
-    #     except BookstoreData.DoesNotExist:
-    #         books = None
-    #     return books
-    #
-    #
-    # def get(self,request):
-    #     try:
-    #         books = BookstoreData.objects.all()
-    #     except BookstoreData.DoesNotExist:
-    #         return Response({'msg': 'Record is not available..Try again'},
-    #                        status=status.HTTP_404_NOT_FOUND)
-    #     serializer = Bookstoreserializer(books)
-    #     return Response(serializer.books , status=status.HTTP_200_OK)
-
-    #
-    # def put(self,request):
-    #     books = self.get_object()
-    #     if books is None:
-    #         return Response({'msg': 'Record is not available to updating.Try again...'},
-    #                         status=status.HTTP_404_NOT_FOUND)
-    #
-    #     serializer = Bookstoreserializer(books, data=request.data)
-    #
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data ,
-    #                         status=status.HTTP_200_OK)
-    #     else:
-    #         return Response(serializer.errors ,
-    #                         status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-    def delete(self,request):
-        books = self.get_object()
-
-        if books is None:
-            return Response({'msg': 'Record is not available to Deleting.Try another record...'},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        books.delete()
-        return Response({'message' : 'Record deleted succefully'},
-                        status = status.HTTP_204_NO_CONTENT)
 
 
 
@@ -99,28 +59,7 @@ class BookDetails(APIView):
 
 
 
-# class Bookview_List(generics.ListAPIView):
-#     queryset = BookstoreData.objects.all()
-#     serializer_class = Bookstoreserializer
-#
-# class Bookview_Create(generics.CreateAPIView):
-#     queryset = BookstoreData.objects.all()
-#     serializer_class = Bookstoreserializer
-#
-# class Bookview_Retrive(generics.RetrieveAPIView):
-#     queryset = BookstoreData.objects.all()
-#     serializer_class = Bookstoreserializer
-#
-# class Bookview_Update(generics.UpdateAPIView):
-#     queryset = BookstoreData.objects.all()
-#     serializer_class = Bookstoreserializer
-#
-# class Bookview_Delete(generics.DestroyAPIView):
-#     queryset = BookstoreData.objects.all()
-#     serializer_class = Bookstoreserializer
-#
-#     permission_classes = (IsAuthenticated,)
-#     authentication_classes = (JSONWebTokenAuthentication,)
+
 
 
 
