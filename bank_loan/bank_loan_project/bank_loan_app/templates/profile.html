@@ -1,0 +1,15 @@
+<form action="/loan/" method="POST">
+    {% csrf_token %}
+    username : <input type="text" required name="uname"> <br><br>
+    password1 :<input type="text" name="pwd"><br><br>
+    password2 :<input type="text" name="pwd2"><br><br>
+    mobile    :<input type="text" name="mobile"><br><br>
+    email     :<input type="text" name="email"><br><br>
+    gender    :<input type="radio" name="gender" value="male"> Male<br>
+                <input type="radio" name="gender" value="female" style="margin-left:60px"> Female<br><br><br>
+
+
+
+<button onclick="{% url 'bank_loan_app:loan' %}">loan</button>
+
+</form>
