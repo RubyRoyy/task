@@ -25,6 +25,7 @@ class LoanData(models.Model):
     Loan_period=models.IntegerField(default=30)
     Date=models.DateField(auto_now=True)
     status=models.BooleanField(default=False)
+    Loan_STATUS=models.CharField(max_length=25,default='Available')
 
     def __str__(self):
         return str(self.username)

@@ -1,12 +1,4 @@
-# from django.urls import path
-# # from.views import (Profileview,
-# #             )
-# # app_name='bank_loan_app'
-# # urlpatterns=[
-# #         path('',Profileview),
-# #             ]
-#
-#
+
 from django.contrib import admin
 from django.urls import path,include
 from bank_loan_app import views
@@ -14,7 +6,7 @@ from bank_loan_app import views
 app_name = 'bank_loan_app'
 
 urlpatterns = [
-    path('createuser/',views.UserCreateView.as_view()),
+    path('',views.UserCreateView.as_view()),
     path('userlist/',views.UserList.as_view()),
     path('loan/',views.LoanView.as_view()),
     path('loan_detail/',views.LoanDetailView.as_view()),

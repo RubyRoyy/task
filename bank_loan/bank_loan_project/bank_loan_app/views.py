@@ -16,9 +16,10 @@ from rest_framework import status
 from rest_framework.response import Response
 
 class UserCreateView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        data = request.data
+        # data = request.data
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -49,42 +50,40 @@ class UserList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class LoanDetailView(APIView):
     def get(self,request):
         data1=ProfileData.objects.get(username=self.request.user)
-        data=LoanData.objects.filter(username__username=data1).values('Loan_amount','Loan_period','status')
+        data=LoanData.objects.filter(username__username=data1).values('Loan_amount','Loan_period','status','Date','Loan_STATUS')
         return Response(data)
-
 
 class LoanStatusView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = LoanClearSerializer
 
-
     def get(self,request):
         data1 = ProfileData.objects.get(username=self.request.user)
         loan_statement = LoanData.objects.filter(username__username=data1).values('Loan_amount','Loan_period','status','Date')
-        list_of_loan = len(loan_statement)
-        if list_of_loan !=0:
-            if loan_statement[list_of_loan-1]['status'] == True:
-                total_days = datetime.date.today()-loan_statement[list_of_loan-1]['Date']
-                Actual_due_date= loan_statement[list_of_loan-1]['Date']+datetime.timedelta(days=loan_statement[list_of_loan-1]['Loan_period'])
-                if total_days.days <= loan_statement[list_of_loan-1]['Loan_period']:
-                    remaining_days =  loan_statement[list_of_loan-1]['Loan_period'] - total_days.days
+        len_of_loan = len(loan_statement)
+        if len_of_loan !=0:
+            if loan_statement[len_of_loan-1]['status'] == True:
+                total_days = datetime.date.today()-loan_statement[len_of_loan-1]['Date']
+                Actual_due_date= loan_statement[len_of_loan-1]['Date']+datetime.timedelta(days=loan_statement[len_of_loan-1]['Loan_period'])
+                if total_days.days <= loan_statement[len_of_loan-1]['Loan_period']:
+                    remaining_days =  loan_statement[len_of_loan-1]['Loan_period'] - total_days.days
                 else:
-                    remaining_days =  total_days.days - loan_statement[list_of_loan-1]['Loan_period']
-                amount=loan_statement[list_of_loan-1]['Loan_amount']
+                    remaining_days =  total_days.days - loan_statement[len_of_loan-1]['Loan_period']
+                amount=loan_statement[len_of_loan-1]['Loan_amount']
                 r=0.6
                 t=(1/365)
                 SI_day= (amount*r*t)/100
                 Total_day=SI_day*total_days.days
                 principal_amount = amount+Total_day
-                if total_days.days < loan_statement[list_of_loan-1]['Loan_period']:
+                if total_days.days < loan_statement[len_of_loan-1]['Loan_period']:
+                    loan_statement.update(Loan_STATUS='closed')
                     return Response({'Total amount to be paid':principal_amount,
                                      'Number of days left to pay loan': str(remaining_days)+' days',
                                      'Due date':Actual_due_date})
-                elif total_days.days == loan_statement[list_of_loan-1]['Loan_period']:
+                elif total_days.days == loan_statement[len_of_loan-1]['Loan_period']:
                     return Response({'Total amount to be paid':principal_amount,
                                      'Number of days left to pay loan': str(remaining_days)+' days',
                                      'Loan status':'Last day to pay loan',
@@ -97,17 +96,40 @@ class LoanStatusView(APIView):
             return Response({'Loan status':'You do not have any active loan'})
         return Response({'Loan status': "You haven't taken any loan"})
 
-    def put(self,request):
-        data1 = ProfileData.objects.get(username=self.request.user)
-        loan_statement = LoanData.objects.filter(username__username=data1).values('Loan_amount', 'Loan_period', 'status')
+    def post(self,request):
+
         data = request.data
-        list_of_loan = len(loan_statement)
-        if list_of_loan != 0:
-            if loan_statement[list_of_loan-1]['status']==True:
-                if len(data)==0:
-                    loan_statement.update(loan_status=False)
-                    return Response({'Loan status': "You cleared your loan"})
+        serializer = LoanClearSerializer(data=data)
+        serializer.is_valid()
+        data2=serializer.data['status']
+        data1 = ProfileData.objects.get(username=self.request.user)
+        loan_statement = LoanData.objects.filter(username__username=data1)
+        len_of_loan=len(loan_statement)
+
+        if data2==True and loan_statement[len_of_loan-1]['status']==True:
+            if len_of_loan!=0:
+                loan_statements=LoanData.objects.filter(username=data1)[len_of_loan-1]
+                total_days = datetime.date.today() - loan_statements.Date
+
+                if total_days.days < loan_statements.Loan_period:
+                    loan_statements.Loan_STATUS='Foreclosed'
+                    loan_statements.status=False
+                    loan_statements.save()
+                    return Response({"Loan_status":status.Loan_STATUS})
+
+                elif total_days==loan_statements.Loan_period:
+                    loan_statements.Loan_STATUS = 'Disbursed'
+                    loan_statements.status = False
+                    loan_statements.save()
+                    return Response({"Loan_status": status.Loan_STATUS})
                 else:
-                    return Response({'Loan status':'You have already taken loan'})
-        return Response({'Loan status': "You haven't taken any loan"})
+                    loan_statements.Loan_STATUS = 'Defaulter'
+                    loan_statements.status = False
+                    loan_statements.save()
+                    return Response({"Loan_status": status.Loan_STATUS})
+            else:
+                return Response({'Loan status': "You haven't taken any loan"})
+
+
+
 
