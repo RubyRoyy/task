@@ -137,16 +137,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 SITE_ID= 0
 
 LOGIN_REDIRECT_URL = "/"
-#
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework.authentication.BasicAuthentication',
-#         'rest_framework.authentication.SessionAuthentication',
-#     ],
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.IsAuthenticated',
-#         'rest_framework.permissions.IsAdminUser'
-#     ]
-#
-# }
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'rubyroy19694@gmail.com'
+EMAIL_HOST_PASSWORD = '******'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

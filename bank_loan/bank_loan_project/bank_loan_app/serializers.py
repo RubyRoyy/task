@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import ProfileData, LoanData
 
-
 class ProfileSerializers(serializers.ModelSerializer):
     class Meta:
         model = ProfileData
@@ -37,3 +36,8 @@ class LoanClearSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoanData
         fields = ('status',)
+
+class EmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        fields=('email')
